@@ -31,3 +31,7 @@
 ## 然后用vuex保存要购买的商品的信息
 
 ## 用echarts显示出来
+
+安装echarts
+
+> npm install echarts --save

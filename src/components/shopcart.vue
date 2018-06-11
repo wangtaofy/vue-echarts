@@ -8,45 +8,53 @@
           <p class="name">{{good.name}}</p>
           <p class="price">￥{{good.price}}</p>
           <div class="counts">
-            <span class="jian">-</span>
+            <span class="jian" @click="jiancount(good.id)">-</span>
             <span class="count">{{good.count}}</span>
-            <span class="jia">+</span>
+            <span class="jia" @click="addcount(good.id)">+</span>
           </div>
         </li>
       </ul>
     </div>
     <div class="buttons">
+      <p class="allselect-cont"><input type="checkbox" name="全选" id="" class="allselect" :checked="shopData.length === selectGoodId.length" @click="allselect">全选</p>
       <p class="button-text">已选择{{selectGoodId.length}}件商品</p>
       <p class="allprice">总价：<span class="num">￥{{allprice}}</span></p>
       <p class="button" @click="showEcharts">确定</p>
     </div>
     <div class="echarts">
-      <p class="echarts-name" v-for="good in buyShop" :key="good.id">{{good.name}}</p>
+      <div class="myecharts" id="myecharts" style="width: 500px;height: 300px;"></div>
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'HelloWorld',
-  data () {
+  data() {
     return {
       // 选择的商品id
       selectGoodId: []
-    }
+    };
+  },
+  created() {
+    this.$nextTick(() => {
+      this.myecharts = this.$echarts.init(document.querySelector("#myecharts"));
+    });
   },
   computed: {
     shopData: {
-      get () {
+      get() {
         return this.$store.state.shopData;
+      },
+      set(value) {
+        this.$store.commit("setShopData", value);
       }
     },
     buyShop: {
-      get () {
+      get() {
         return this.$store.state.buyShop;
       },
-      set (value) {
-        this.$store.commit('setBuyShop', value);
+      set(value) {
+        this.$store.commit("setBuyShop", value);
       }
     },
     allprice() {
@@ -74,8 +82,39 @@ export default {
         selectGoodId.push(goodid);
       }
     },
+    // 全选
+    allselect() {
+      if (this.selectGoodId.length === this.shopData.length) {
+        this.selectGoodId = [];
+      } else {
+        this.selectGoodId = this.shopData.map(ele => {
+          return ele.id;
+        });
+      }
+    },
+    // 加商品
+    addcount(goodid) {
+      let shopData = this.shopData;
+      shopData.map((ele) => {
+        if (ele.id === goodid) {
+          ele.count++;
+        }
+        return ele;
+      })
+    },
+    // 减商品
+    jiancount(goodid) {
+      let shopData = this.shopData;
+      shopData.map((ele) => {
+        if (ele.id === goodid && ele.count > 1) {
+          ele.count--;
+        }
+        return ele;
+      })
+    },
     // 显示echarts
     showEcharts() {
+      let that = this;
       this.buyShop = [];
       let shopData = this.shopData;
       let selectGoodId = this.selectGoodId;
@@ -85,14 +124,62 @@ export default {
           buyShop.push(ele);
         }
       });
+
+      // echarts 的横坐标
+      let xAxisData = buyShop.map(ele => {
+        return ele.shortName;
+      });
+
+      // echarts 横坐标每一项的值
+      let seriespriceData = buyShop.map(ele => {
+        return ele.price;
+      });
+      let seriecountData = buyShop.map(ele => {
+        return ele.count;
+      });
+
+      // echarts
+      // let myecharts = this.$echarts.init(document.querySelector("#myecharts"));
+      if (xAxisData.length > 0) {
+        this.myecharts.setOption({
+          title: {
+            text: "购物"
+          },
+          tooltip: {},
+          legend: {
+            data: ["价格", "数量"]
+          },
+          xAxis: {
+            data: xAxisData,
+            axisLabel: {
+              interval: 0,
+              rotate: 40
+            }
+          },
+          yAxis: {},
+          series: [
+            {
+              name: "价格",
+              type: "bar",
+              data: seriespriceData
+            },
+            {
+              name: '数量',
+              type: 'bar',
+              data: seriecountData
+            }
+          ]
+        });
+      }
     }
   }
-}
+};
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-h1, h2 {
+h1,
+h2 {
   font-weight: normal;
 }
 ul {
@@ -153,7 +240,8 @@ a {
   border: 1px solid #ccc;
 }
 
-.jia, .jian {
+.jia,
+.jian {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -180,6 +268,7 @@ a {
 .buttons {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
   margin-right: 100px;
   height: 50px;
   background-color: #ccc;
@@ -190,6 +279,7 @@ a {
   justify-content: center;
   align-items: center;
   margin-top: 0;
+  margin-bottom: 0;
   width: 100px;
   height: 50px;
   color: #fff;
@@ -204,5 +294,14 @@ a {
 
 .allprice {
   margin-right: 50px;
+}
+
+.num {
+  display: inline-block;
+  width: 60px;
+}
+
+.allselect-cont {
+  margin-right: 330px;
 }
 </style>

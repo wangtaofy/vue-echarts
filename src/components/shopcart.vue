@@ -5,13 +5,14 @@
         <li class="shopItem" v-for="good in shopData" :key="good.id">
           <input type="checkbox" name="" id="" class="good-select" :checked="selectGoodId.indexOf(good.id)>-1" @click="selectGood(good.id)">
           <img :src="good.img" alt="" class="good-img">
-          <p class="name">{{good.name}}</p>
+          <!-- <p class="name">{{good.name}}</p> -->
           <p class="price">￥{{good.price}}</p>
           <div class="counts">
             <span class="jian" @click="jiancount(good.id)">-</span>
             <span class="count">{{good.count}}</span>
             <span class="jia" @click="addcount(good.id)">+</span>
           </div>
+          <p class="goodallprice">￥{{good.price * good.count}}</p>
         </li>
       </ul>
     </div>
@@ -20,9 +21,6 @@
       <p class="button-text">已选择{{selectGoodId.length}}件商品</p>
       <p class="allprice">总价：<span class="num">￥{{allprice}}</span></p>
       <p class="button" @click="showEcharts">确定</p>
-    </div>
-    <div class="echarts">
-      <div class="myecharts" id="myecharts" style="width: 500px;height: 300px;"></div>
     </div>
   </div>
 </template>
@@ -34,11 +32,6 @@ export default {
       // 选择的商品id
       selectGoodId: []
     };
-  },
-  created() {
-    this.$nextTick(() => {
-      this.myecharts = this.$echarts.init(document.querySelector("#myecharts"));
-    });
   },
   computed: {
     shopData: {
@@ -124,53 +117,7 @@ export default {
           buyShop.push(ele);
         }
       });
-
-      // echarts 的横坐标
-      let xAxisData = buyShop.map(ele => {
-        return ele.shortName;
-      });
-
-      // echarts 横坐标每一项的值
-      let seriespriceData = buyShop.map(ele => {
-        return ele.price;
-      });
-      let seriecountData = buyShop.map(ele => {
-        return ele.count;
-      });
-
-      // echarts
-      // let myecharts = this.$echarts.init(document.querySelector("#myecharts"));
-      if (xAxisData.length > 0) {
-        this.myecharts.setOption({
-          title: {
-            text: "购物"
-          },
-          tooltip: {},
-          legend: {
-            data: ["价格", "数量"]
-          },
-          xAxis: {
-            data: xAxisData,
-            axisLabel: {
-              interval: 0,
-              rotate: 40
-            }
-          },
-          yAxis: {},
-          series: [
-            {
-              name: "价格",
-              type: "bar",
-              data: seriespriceData
-            },
-            {
-              name: '数量',
-              type: 'bar',
-              data: seriecountData
-            }
-          ]
-        });
-      }
+      this.$router.push({path: '/showecharts'});
     }
   }
 };
@@ -217,7 +164,7 @@ a {
 }
 
 .good-img {
-  margin-right: 30px;
+  margin-right: 100px;
 }
 
 .name {
@@ -228,7 +175,7 @@ a {
 }
 
 .price {
-  margin-right: 50px;
+  margin-right: 200px;
   width: 50px;
 }
 
@@ -236,6 +183,7 @@ a {
   display: flex;
   flex-direction: row;
   align-items: center;
+  margin-right: 100px;
   height: 30px;
   border: 1px solid #ccc;
 }

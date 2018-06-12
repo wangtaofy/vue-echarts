@@ -5,6 +5,7 @@ Vue.use(Router)
 
 import shopcart from '@/components/shopcart'
 import showecharts from '@/components/showecharts'
+import sort from '@/components/sort'
 
 export default new Router({
   mode: 'history',
@@ -16,6 +17,10 @@ export default new Router({
     {
       path: '/showecharts',
       component: showecharts
+    },
+    {
+      path: '/sort',
+      component: sort
     }
   ]
 })
